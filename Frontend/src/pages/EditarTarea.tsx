@@ -123,7 +123,7 @@ const EditarTarea: React.FC = () => {
 
     try {
       // Si la foto ha sido eliminada
-      if (fotoEliminada) {
+      if ((fotoEliminada || foto) && fotoPrevia) {
         await axios.put(
           `http://${localStorage.getItem(
             "url"
