@@ -46,7 +46,7 @@ const Home: React.FC = () => {
           localStorage.setItem("nombreUsuario", response.data.usuario.nombre);
           localStorage.setItem("correoUsuario", response.data.usuario.correo);
 
-          console.log("Token: ",localStorage.getItem("token"))
+          //console.log("Token: ",localStorage.getItem("token"))
 
           history.replace("/listadoproyectos");
           setCorreo("");
