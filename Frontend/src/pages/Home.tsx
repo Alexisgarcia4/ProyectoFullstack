@@ -51,14 +51,22 @@ const Home: React.FC = () => {
           history.replace("/listadoproyectos");
           setCorreo("");
           setContrasena("");
-        } else {
-          setError("Credenciales incorrectas.");
-          setShowAlert(true);
-        }
+        } 
       } catch (err) {
+        // Verifica si el error tiene una respuesta de axios
+      if (err.response) {
+        // Error de autenticación u otro error del servidor
+        if (err.response.status === 401) {
+          setError("Credenciales incorrectas.");
+        } else {
+          setError(`Error del servidor: ${err.response.status}`);
+        }
+      } else {
+        // Error de conexión
         setError("Error al conectar con el servidor.");
-        setShowAlert(true);
       }
+      setShowAlert(true);
+    }
     } else {
       setError("Por favor, ingresa tu correo y contraseña.");
       setShowAlert(true);
