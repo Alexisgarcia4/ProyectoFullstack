@@ -18,6 +18,7 @@ import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
 import ProfileMenu from "../components/ProfileMenu";
 import { Camera, CameraResultType } from "@capacitor/camera"; // Importamos Capacitor Camera para la captura de la imagen
+import { setMode } from "ionicons/dist/types/stencil-public-runtime";
 const token = localStorage.getItem("token");
 
 const EditarTarea: React.FC = () => {
@@ -35,6 +36,7 @@ const EditarTarea: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const history = useHistory();
   const [fotoEliminada, setFotoEliminada] = useState(false); // Estado para controlar si la foto ha sido eliminada
+  const [fotoModificada, setFotoModificada] = useState(false); // Estado para controlar si la foto ha sido modificada
 
   const obtenerTarea = async () => {
     try {
@@ -89,7 +91,13 @@ const EditarTarea: React.FC = () => {
         type: blob.type,
       });
       setFoto(file); // Guardamos la nueva imagen capturada en el estado como File
+
+      fotoPrevia&&setFotoModificada(true);
+
+      
       setFotoPrevia(URL.createObjectURL(file)); // Para mostrar la vista previa
+
+     
     } catch (error) {
       console.error("Error al tomar la foto", error);
     }
@@ -110,20 +118,12 @@ const EditarTarea: React.FC = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("nombre", nombre);
-    formData.append("mensaje", mensaje);
-    formData.append("prioridad", prioridad);
-    formData.append("hecha", hecha.toString());
-    formData.append("proyectoId", idProyecto);
-
-    if (foto) {
-      formData.append("foto", foto); // Solo enviamos la foto si hay una nueva seleccionada
-    }
+    
 
     try {
       // Si la foto ha sido eliminada
-      if ((fotoEliminada || foto) && fotoPrevia) {
+      if (fotoEliminada || fotoModificada) {
+        
         await axios.put(
           `http://${localStorage.getItem(
             "url"
@@ -135,7 +135,27 @@ const EditarTarea: React.FC = () => {
             },
           }
         );
+
+        if(fotoEliminada){
+          setFoto(null); // Actualizamos el estado de foto a null
+          setFotoPrevia(null); // Quitamos la vista previa
+          setFotoEliminada(false); // Reiniciamos el estado de eliminación de foto
+          }
+
+        if(fotoModificada){setFotoModificada(false)}
+        
       }
+
+      const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("mensaje", mensaje);
+    formData.append("prioridad", prioridad);
+    formData.append("hecha", hecha.toString());
+    formData.append("proyectoId", idProyecto);
+
+    if (foto) {
+      formData.append("foto", foto); // Solo enviamos la foto si hay una nueva seleccionada
+    }
 
       // Guardar los demás cambios de la tarea
       await axios.put(
@@ -169,6 +189,7 @@ const EditarTarea: React.FC = () => {
       setShowAlert(true);
     }
   };
+
 
   const confirmarEliminarFoto = () => {
     setConfirmDelete(true); // Activamos la alerta de confirmación
